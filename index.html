@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Datos unificados - Prueba de tolerancia a la glucosa</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  body {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    margin: 20px;
+    background: #f4f7fa;
+    color: #333;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 25px 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.08);
+  }
+  .page-title {
+    font-weight: 600;
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 24px;
+    color: #2c3e50;
+  }
+  .chart-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .chart-subtitle {
+    font-size: 1rem;
+    color: #2c3e50;
+    font-weight: 500;
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  canvas {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: 500px !important;
+  }
+  /* Lista horizontal para IDs, sin números, sin título */
+  .id-list-container {
+    max-width: 900px;
+    margin: 20px auto 0 auto;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 14px;
+    color: #2c3e50;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 18px 36px; /* espaciado entre elementos, filas y columnas */
+    padding-left: 0;
+  }
+  .id-list-container span {
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="page-title">Datos unificados</div>
+  <div class="chart-title">Prueba de tolerancia a la glucosa</div>
+  <div class="chart-subtitle">Todos los grupos combinados</div>
+  <canvas id="unifiedChart"></canvas>
+
+  <nav aria-label="Lista horizontal de IDs" class="id-list-container" id="idListContainer"></nav>
+</div>
+
+<script>
+  const labels = ["T0", "T15", "T30", "T60", "T90", "T120"];
+
+  function getColor(index) {
+    const palette = [
+      "#007bff", "#6610f2", "#17a2b8", "#28a745", "#fd7e14",
+      "#dc3545", "#6f42c1", "#20c997", "#e83e8c", "#343a40",
+      "#1abc9c", "#2ecc71", "#e74c3c", "#9b59b6", "#34495e",
+      "#f39c12", "#d35400", "#c0392b", "#7f8c8d", "#27ae60",
+      "#2980b9", "#8e44ad", "#2c3e50", "#16a085", "#27ae60",
+      "#d35400", "#e67e22", "#f1c40f", "#c0392b", "#95a5a6",
+      "#bdc3c7", "#7f8c8d", "#34495e", "#2c3e50", "#e74c3c",
+      "#9b59b6", "#27ae60", "#2980b9", "#16a085", "#f39c12"
+    ];
+    return palette[index % palette.length];
+  }
+
+  const combinedData = [
+    {id: 21, values: [109, 348, 281, 244, 161, 146]},
+    {id: 17, values: [103, 361, 360, 264, 196, 143]},
+    {id: 20, values: [132, 318, 320, 218, 180, 148]},
+    {id: 22, values: [113, 221, 395, 247, 181, 148]},
+    {id: 18, values: [116, 292, 370, 282, 190, 166]},
+    {id: 29, values: [120, 418, 459, 433, 328, 258]},
+    {id: 28, values: [142, 321, 414, 491, 381, 243]},
+    {id: 27, values: [114, 467, 553, 489, 383, 256]},
+    {id: 26, values: [103, 477, 547, 460, 294, 196]},
+    {id: 30, values: [127, 444, 447, 362, 297, 223]},
+    {id: 25, values: [115, 363, 468, 459, 364, 245]},
+    {id: 23, values: [133, 465, 486, 406, 336, 206]},
+    {id: 24, values: [121, 411, 459, 494, 395, 302]},
+    {id: 4, values: [123, 205, 287, 244, 221, 149]},
+    {id: 8, values: [97, 166, 266, 228, 194, 141]},
+    {id: 1, values: [134, 183, 289, 176, 133, 134]},
+    {id: 2, values: [116, 184, 331, 248, 177, 136]},
+    {id: 3, values: [100, 146, 119, null, null, null]},
+    {id: 5, values: [106, 234, null, null, null, null]},
+    {id: 6, values: [112, 317, 379, 343, 238, 147]},
+    {id: 7, values: [106, 600, 354, 239, 163, 121]},
+    {id: 10, values: [135, 548, 573, 470, 329, 139]},
+    {id: 11, values: [125, 236, 493, 380, 297, 218]},
+    {id: 12, values: [114, 317, 521, 489, 382, 185]},
+    {id: 13, values: [112, 475, 426, 468, 364, 211]},
+    {id: 16, values: [136, 467, 600, 582, 487, 289]},
+    {id: 9, values: [120, 327, 380, 322, 206, 160]},
+    {id: 15, values: [127, 318, 374, 321, 219, 141]},
+    {id: 14, values: [135, 328, 341, 238, 189, 156]}
+  ];
+
+  function createDatasets(data) {
+    return data.map((entry, i) => ({
+      label: `ID ${entry.id}`,
+      data: entry.values,
+      borderColor: getColor(i),
+      backgroundColor: getColor(i) + "88",
+      fill: false,
+      borderWidth: 2,
+      tension: 0.3,
+      spanGaps: true,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      pointBackgroundColor: getColor(i),
+    }));
+  }
+
+  // Inicializar la gráfica unificada
+  const ctx = document.getElementById('unifiedChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: createDatasets(combinedData),
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { mode: 'nearest', intersect: false }
+      },
+      interaction: {
+        mode: 'nearest',
+        axis: 'x',
+        intersect: false
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {color: '#e0e4e8'},
+          ticks: {color: '#333', font: {size: 11, family: 'Georgia, "Times New Roman", Times, serif'}}
+        },
+        x: {
+          grid: {color: '#e0e4e8'},
+          ticks: {color: '#333', font: {size: 11, family: 'Georgia, "Times New Roman", Times, serif'}, maxRotation: 0, minRotation: 0}
+        }
+      }
+    }
+  });
+
+  // Mostrar lista horizontal sin números ni cuadros
+  const idListContainer = document.getElementById('idListContainer');
+  // Incluimos el ID 19 en la lista (sin datos para gráfica)
+  const allIds = combinedData.map(entry => entry.id);
+  allIds.push(19);
+  // Ordenar IDs numéricamente
+  allIds.sort((a,b) => a - b);
+  allIds.forEach(id => {
+    const span = document.createElement('span');
+    span.textContent = `ID ${id}`;
+    idListContainer.appendChild(span);
+  });
+</script>
+
+</body>
+</html>
